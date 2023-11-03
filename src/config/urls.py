@@ -13,7 +13,7 @@ schema_view = get_schema_view(
         default_version="v1",
     ),
     public=True,
-    permission_classes=(AllowAny,),
+    permission_classes=[AllowAny],
 )
 
 urlpatterns = [
@@ -23,6 +23,6 @@ urlpatterns = [
         schema_view.with_ui("swagger", cache_timeout=0),
         name="schema-swagger-ui",
     ),
-    path(f"{API_ROOT}/auth/", include("authentication.urls")),
+    path(f"{API_ROOT}/login/", include("authentication.urls")),
     path(f"{API_ROOT}/users/", include("users.urls")),
 ]
