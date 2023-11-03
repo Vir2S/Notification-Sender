@@ -2,7 +2,7 @@
 
 if [ "$DATABASE" = "postgres" ]
 then
-    echo "Waiting for postgres..."
+    echo "Waiting for postgresql..."
 
     while ! nc -z $SQL_HOST $SQL_PORT; do
       sleep 0.1
@@ -11,7 +11,7 @@ then
     echo "PostgreSQL started"
 fi
 
-python src/manage.py flush --no-input
+python src/manage.py makemigrations
 python src/manage.py migrate
 
 exec "$@"
