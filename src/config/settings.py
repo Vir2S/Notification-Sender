@@ -1,5 +1,6 @@
 import os
 
+from datetime import timedelta
 from distutils.util import strtobool
 from dotenv import load_dotenv
 from pathlib import Path
@@ -40,6 +41,7 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
+    "authentication",
     "users"
 ]
 
@@ -132,3 +134,46 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# REST Framework settings
+REST_FRAMEWORK = {
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],
+    # "DEFAULT_PARSER_CLASSES": [
+    #     "rest_framework.parsers.JSONParser",
+    # ],
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.AllowAny",
+    ),
+
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
+    "DATE_FORMAT": "%d/%m/%Y",
+    "TIME_FORMAT": "%H:%M",
+    "DATE_INPUT_FORMATS": ("%d/%m/%Y",),
+    "DATETIME_FORMAT": "%d/%m/%Y %H:%M:%S",
+    "LONG_DATETIME_FORMAT": "%d/%m/%Y %H:%M:%S",
+    "DATETIME_INPUT_FORMATS": ("%d/%m/%Y %H:%M",),
+}
+
+# Simple JWT Settings
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        seconds=int(os.getenv("JWT_ACCESS_TOKEN_LIFETIME", default=600))
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=60),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+# CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", default="redis://broker:6379/0")
+
+if DEBUG:
+    REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"].append(
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    )
