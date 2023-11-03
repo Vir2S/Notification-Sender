@@ -6,5 +6,6 @@ API_ROOT = "api/v1"
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path(f"{API_ROOT}/users/", include("users.urls"), namespace="users"),
+    path(f"{API_ROOT}/auth/", include("authentication.urls")),
+    path(f"{API_ROOT}/users/", include("users.urls")),
 ]
