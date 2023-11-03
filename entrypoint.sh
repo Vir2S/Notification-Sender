@@ -2,7 +2,7 @@
 
 if [ "$DATABASE" = "postgres" ]
 then
-    echo "Waiting for postgres..."
+    echo "Waiting for postgresql..."
 
     while ! nc -z $SQL_HOST $SQL_PORT; do
       sleep 0.1

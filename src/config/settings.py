@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 
+from distutils.util import strtobool
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -26,10 +27,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY", default="invalid")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = strtobool(os.getenv("DEBUG", default="false"))
 
 ALLOWED_HOSTS = []
 
@@ -81,15 +82,16 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        "ENGINE": os.getenv("SQL_ENGINE", "django.db.backends.postgresql"),
-        "NAME": os.getenv("SQL_DATABASE", "notif"),
-        "USER": os.getenv("SQL_USER", "notif"),
-        "PASSWORD": os.getenv("SQL_PASSWORD", "notif"),
-        "HOST": os.getenv("SQL_HOST", "localhost"),
-        "PORT": os.getenv("SQL_PORT", "5432"),
+        "ENGINE": os.getenv("SQL_ENGINE", default="django.db.backends.postgresql"),
+        "NAME": os.getenv("SQL_DATABASE", default="notif"),
+        "USER": os.getenv("SQL_USER", default="notif"),
+        "PASSWORD": os.getenv("SQL_PASSWORD", default="notif"),
+        "HOST": os.getenv("SQL_HOST", default="localhost"),
+        "PORT": os.getenv("SQL_PORT", default="5432"),
     }
 }
 
+# AUTH_USER_MODEL = 'users.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
