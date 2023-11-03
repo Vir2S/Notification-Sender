@@ -1,4 +1,5 @@
 FROM python:3.11.5-slim
+
 WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -12,7 +13,6 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --upgrade pip \
-    && pip install --upgrade setuptools \
     && pip install -r requirements.txt
 
 COPY . .
