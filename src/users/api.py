@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.generics import ListCreateAPIView
 from rest_framework.permissions import AllowAny
@@ -25,11 +26,17 @@ class UserListCreateAPIView(ListCreateAPIView):
 
         return User.objects.filter(id=user.id)
 
+    @swagger_auto_schema(responses={200: UserPublicSerializer(many=True)})
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = UserPublicSerializer(queryset, many=True)
-        return Response(serializer.data)
+        headers = self.get_success_headers(serializer.data)
 
+        return Response(
+            serializer.data, status=status.HTTP_200_OK, headers=headers
+        )
+
+    @swagger_auto_schema(responses={201: UserPublicSerializer()})
     def post(self, request):
         create_serializer = self.get_serializer(data=request.data)
         create_serializer.is_valid(raise_exception=True)

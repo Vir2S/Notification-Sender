@@ -11,7 +11,7 @@ API_ROOT = "api/v1"
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Sender API",
+        title="Notification Sender API",
         default_version="v1",
     ),
     public=True,
