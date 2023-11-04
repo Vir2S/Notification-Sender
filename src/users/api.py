@@ -1,12 +1,34 @@
+from django.contrib.auth import get_user_model
 from rest_framework import status
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import ListCreateAPIView
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from users.constants import Role
 from users.serializers import UserCreateSerializer, UserPublicSerializer
 
 
-class UserCreateAPIView(CreateAPIView):
+User = get_user_model()
+
+
+class UserListCreateAPIView(ListCreateAPIView):
     serializer_class = UserCreateSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if user.is_anonymous:
+            return User.objects.none()
+
+        if user.role == Role.ADMIN:
+            return User.objects.all()
+
+        return User.objects.filter(id=user.id)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = UserPublicSerializer(queryset, many=True)
+        return Response(serializer.data)
 
     def post(self, request):
         create_serializer = self.get_serializer(data=request.data)
