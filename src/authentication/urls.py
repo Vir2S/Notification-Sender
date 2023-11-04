@@ -8,7 +8,10 @@ from authentication.serializers import LoginResponseSerializer
 urlpatterns = [
     path(
         "token/",
-        swagger_auto_schema(method="post", responses={201: LoginResponseSerializer})(
+        swagger_auto_schema(
+            method="post",
+            responses={201: LoginResponseSerializer}
+        )(
             TokenObtainPairView.as_view()
         ),
     ),
