@@ -42,6 +42,7 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "authentication",
+    "notifications",
     "users"
 ]
 
