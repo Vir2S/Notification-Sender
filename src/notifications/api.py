@@ -51,6 +51,6 @@ class NotificationViewSet(viewsets.ModelViewSet):
                     {
                         "error": "You don't have permission to create",
                     },
-                    status=200
+                    status=403
                 )
             serializer.save(user=user)
