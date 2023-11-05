@@ -8,6 +8,7 @@ from users.constants import Role
 
 
 class NotificationViewSet(viewsets.ModelViewSet):
+    queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
 
     def get_queryset(self):

@@ -29,7 +29,7 @@ urlpatterns = [
         schema_view.with_ui("swagger", cache_timeout=0),
         name="schema-swagger-ui",
     ),
-    path(f"{API_ROOT}/login/", include("authentication.urls")),
+    path(f"{API_ROOT}/auth/", include("authentication.urls")),
     path(f"{API_ROOT}/users/", include("users.urls")),
     path(f"{API_ROOT}/notifications/", include("notifications.urls"))
 ]
