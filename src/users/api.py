@@ -2,7 +2,6 @@ from django.contrib.auth import get_user_model
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.generics import ListCreateAPIView
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from users.constants import Role

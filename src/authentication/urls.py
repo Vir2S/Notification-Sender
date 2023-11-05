@@ -1,13 +1,14 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenObtainPairView
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework_simplejwt.views import TokenObtainPairView
 
+from authentication.api import UserSignUpCreateAPIView
 from authentication.serializers import LoginResponseSerializer
 
 
 urlpatterns = [
     path(
-        "token/",
+        "signin/",
         swagger_auto_schema(
             method="post",
             responses={201: LoginResponseSerializer}
@@ -15,4 +16,5 @@ urlpatterns = [
             TokenObtainPairView.as_view()
         ),
     ),
+    path("signup/", UserSignUpCreateAPIView.as_view())
 ]

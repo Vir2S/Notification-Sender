@@ -3,14 +3,15 @@ from users.models import User
 
 
 class Notification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
     title = models.CharField(max_length=255, blank=True, null=True)
-    message = models.TextField()
+    message = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+    scheduled_send_date = models.DateTimeField(null=True)
 
     class Meta:
         db_table = "notifications"
-        ordering = ("-id", )
+        ordering = ("-scheduled_send_date", )
 
     def __str__(self):
-        return self.title
+        return f"{str(self.id)} Scheduled - {self.scheduled_send_date}"
