@@ -31,4 +31,5 @@ urlpatterns = [
     ),
     path(f"{API_ROOT}/login/", include("authentication.urls")),
     path(f"{API_ROOT}/users/", include("users.urls")),
+    path(f"{API_ROOT}/notifications/", include("notifications.urls"))
 ]
