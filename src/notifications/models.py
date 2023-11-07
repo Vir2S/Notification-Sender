@@ -8,6 +8,7 @@ class Notification(models.Model):
     message = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     scheduled_send_date = models.DateTimeField(null=True)
+    sent = models.BooleanField(default=False)
 
     class Meta:
         db_table = "notifications"

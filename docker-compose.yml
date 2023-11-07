@@ -4,6 +4,16 @@ networks:
   notif_net:
 
 services:
+  broker:
+    image: redis
+    container_name: notification_broker
+    ports:
+      - 6379:6379
+    depends_on:
+      - db
+    networks:
+      - notif_net
+
   web:
     build:
       context: .
@@ -30,6 +40,41 @@ services:
       - POSTGRES_USER=notif
       - POSTGRES_PASSWORD=notif
       - POSTGRES_DB=notif
+    networks:
+      - notif_net
+
+  worker:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: notification_worker
+    command: bash -c "cd src/ && celery -A config.celery worker -l INFO"
+    volumes:
+      - .:/app
+    ports: []
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - broker
+    networks:
+      - notif_net
+
+  beat:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: notification_beat
+    command: bash -c "cd src/ && celery -A config.celery beat --loglevel=info"
+    volumes:
+      - .:/app
+#    ports: []
+    env_file:
+      - .env
+    depends_on:
+      - web
+      - broker
+      - worker
     networks:
       - notif_net
 

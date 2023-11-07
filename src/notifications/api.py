@@ -4,7 +4,11 @@ from rest_framework.response import Response
 from notifications.models import Notification
 from notifications.permissions import RoleIsAdmin, RoleIsManager, RoleIsUser, IsOwner
 from notifications.serializers import NotificationSerializer
+from notifications.tasks import send_scheduled_notification_task
 from users.constants import Role
+
+
+send_scheduled_notification_task.delay()
 
 
 class NotificationViewSet(viewsets.ModelViewSet):
