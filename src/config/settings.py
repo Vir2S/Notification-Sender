@@ -1,5 +1,6 @@
 import os
 
+from celery.schedules import crontab
 from datetime import timedelta
 from distutils.util import strtobool
 from dotenv import load_dotenv
@@ -35,6 +36,9 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    "celery",
+    "django_celery_beat",
+    "django_celery_results",
     "rest_framework",
     "rest_framework_simplejwt",
     "drf_yasg"
@@ -173,7 +177,12 @@ SIMPLE_JWT = {
 }
 
 # Celery Broker Settings
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TASK_SERIALIZER = "json"
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", default="redis://broker:6379/0")
+CELERY_RESULT_BACKEND=os.getenv("CELERY_RESULT_BACKEND", default="redis://broker:6379/0")
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 # Email SMTP Settings
 EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")

@@ -31,12 +31,24 @@ services:
     networks:
       - notif_net
 
+  db:
+    image: postgres:15
+    container_name: notification_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=notif
+      - POSTGRES_PASSWORD=notif
+      - POSTGRES_DB=notif
+    networks:
+      - notif_net
+
   worker:
     build:
       context: .
       dockerfile: ./Dockerfile
     container_name: notification_worker
-    command: bash -c "cd src/ && celery -A config.celery worker -l INFO && celery -A config.celery beat --loglevel=info"
+    command: bash -c "cd src/ && celery -A config.celery worker -l INFO"
     volumes:
       - .:/app
     ports: []
@@ -48,15 +60,21 @@ services:
     networks:
       - notif_net
 
-  db:
-    image: postgres:15
-    container_name: notification_db
+  beat:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: notification_beat
+    command: bash -c "cd src/ && celery -A config.celery beat --loglevel=info"
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_USER=notif
-      - POSTGRES_PASSWORD=notif
-      - POSTGRES_DB=notif
+      - .:/app
+#    ports: []
+    env_file:
+      - .env
+    depends_on:
+      - web
+      - broker
+      - worker
     networks:
       - notif_net
 
