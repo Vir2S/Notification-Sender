@@ -13,6 +13,7 @@ celery_app.conf.beat_schedule = {
     "send_notifications": {
         "task": "notifications.tasks.send_scheduled_notification_task",
         "schedule": crontab(minute="*/1"),
+        # "args": (notification_id, recipient, subject, message),
     },
 }
 

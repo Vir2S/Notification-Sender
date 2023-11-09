@@ -1,9 +1,9 @@
 from celery import shared_task
-from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 
 from notifications.models import Notification
+from notifications.services import send_email
 
 
 # @shared_task
@@ -23,15 +23,6 @@ from notifications.models import Notification
 @shared_task
 def send_scheduled_notification_task():
     print("Sending email...")
-    subject = "Welcome to Paradise"
-    message = "Hi! I'm glad to see you at my home!"
-    email_from = settings.EMAIL_HOST_USER
-    recipient_list = ["virtualik@gmail.com"]
-    # send_mail(
-    #     subject=subject,
-    #     message=message,
-    #     from_email=email_from,
-    #     recipient_list=recipient_list
-    # )
-    print("Mail has been sent")
-    return "Mail has been sent"
+    send_email(subject, message, [recipient])
+    print("Email has been sent")
+    return "Email has been sent"
