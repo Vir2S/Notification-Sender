@@ -17,20 +17,15 @@ def cancel_celery_task(task_id):
         pass
 
 
-def send_email(subject, message, recipient_list, attachment=None):
+def send_email(subject, message, recipient, attachment=None):
     smtp_server = settings.SMTP_SERVER
     smtp_port = settings.SMTP_PORT
     smtp_user = settings.SMTP_USER
     smtp_password = settings.SMTP_PASSWORD
 
-    smtp_conn = smtplib.SMTP(smtp_server, smtp_port)
-
-    smtp_conn.starttls()
-    smtp_conn.login(smtp_user, smtp_password)
-
     msg = MIMEMultipart()
     msg["From"] = smtp_user
-    msg["To"] = ", ".join(recipient_list)
+    msg["To"] = recipient
     msg["Subject"] = subject
 
     msg.attach(MIMEText(message, "plain"))
@@ -41,6 +36,16 @@ def send_email(subject, message, recipient_list, attachment=None):
             part.add_header("Content-Disposition", "attachment", filename=attachment)
             msg.attach(part)
 
-    smtp_conn.sendmail(smtp_user, recipient_list, msg.as_string())
+    try:
+        smtp_conn = smtplib.SMTP(smtp_server, smtp_port)
+        smtp_conn.starttls()
+        smtp_conn.login(smtp_user, smtp_password)
+        smtp_conn.sendmail(smtp_user, recipient, msg.as_string())
+        smtp_conn.quit()
 
-    smtp_conn.quit()
+        print("Hello from smtp :-)")
+        return "Email has beem sent"
+
+    except Exception as e:
+        print(f"Bad news!")
+        return f"Error: {str(e)}"

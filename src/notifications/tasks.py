@@ -1,28 +1,15 @@
-from celery import shared_task
-from django.conf import settings
-from django.utils import timezone
+from config.celery import celery_app
 
-from notifications.models import Notification
 from notifications.services import send_email
 
 
-# @shared_task
-# def send_scheduled_notification_task():
-#     current_time = timezone.now()
-#     notifications_to_send = Notification.objects.filter(
-#         scheduled_send_date__lte=current_time,
-#         sent=False
-#     )
-#
-#     for notification in notifications_to_send:
-#         # TODO: Implement email's sending logic
-#         # notification.sent = True
-#         print(f"{notification} -- Notification Sent")
-#         # notification.save()
-
-@shared_task
-def send_scheduled_notification_task():
+@celery_app.task
+def send_scheduled_notification_task(instance: dict) -> str:
     print("Sending email...")
-    send_email(subject, message, [recipient])
+    send_email(
+        subject=instance.get("subject"),
+        message=instance.get("message"),
+        recipient=instance.get("recipient")
+    )
     print("Email has been sent")
     return "Email has been sent"
