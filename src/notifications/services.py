@@ -1,10 +1,12 @@
 import smtplib
 
+from celery.result import AsyncResult
 from django.conf import settings
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from celery.result import AsyncResult
+
+from notifications.models import Notification
 
 
 def cancel_celery_task(task_id):
@@ -15,6 +17,13 @@ def cancel_celery_task(task_id):
     except Exception as e:
         print(e)
         pass
+
+
+def mark_as_sent(notification_id):
+    notification = Notification.objects.get(id=notification_id)
+    if notification:
+        notification.sent = True
+        notification.save()
 
 
 def send_email(subject, message, recipient, attachment=None):

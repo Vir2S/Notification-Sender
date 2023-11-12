@@ -55,6 +55,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
                     },
                     status=403,
                 )
+
             instance = serializer.save(user=user)
 
         recipient = instance.user.email
