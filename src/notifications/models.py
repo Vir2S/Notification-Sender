@@ -1,4 +1,6 @@
 from django.db import models
+
+from notifications.validators import validate_date
 from users.models import User
 
 
@@ -7,7 +9,7 @@ class Notification(models.Model):
     title = models.CharField(max_length=255, blank=True, null=True)
     message = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
-    scheduled_send_date = models.DateTimeField(null=True)
+    scheduled_send_date = models.DateTimeField(validators=[validate_date])
     sent = models.BooleanField(default=False)
 
     class Meta:
