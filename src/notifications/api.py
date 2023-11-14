@@ -1,3 +1,4 @@
+from celery import uuid
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 
@@ -62,6 +63,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
         subject = instance.title
         message = instance.message
         scheduled_time = instance.scheduled_send_date
+        task_id = instance.task_id
 
         instance_to_task = {
             "id": instance.id,
@@ -73,5 +75,6 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
         send_scheduled_notification_task.apply_async(
             (instance_to_task, ),
+            task_id=task_id,
             eta=scheduled_time
         )
