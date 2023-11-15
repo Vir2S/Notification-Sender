@@ -1,3 +1,4 @@
+from celery import uuid
 from django.db import models
 
 from notifications.validators import validate_date
@@ -11,6 +12,7 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     scheduled_send_date = models.DateTimeField(validators=[validate_date])
     sent = models.BooleanField(default=False)
+    task_id = models.CharField(max_length=50, default=str(uuid()))
 
     class Meta:
         db_table = "notifications"

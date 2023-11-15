@@ -10,5 +10,5 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields = "__all__"
-        read_only_fields = ["created_at", "sent"]
+        read_only_fields = ["created_at", "sent", "task_id"]
         required_fields = ["user", "scheduled_send_date", "message"]

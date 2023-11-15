@@ -5,7 +5,6 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Встановлення необхідних пакетів, включаючи netcat
 RUN apt-get update && \
     apt-get install -y libpq-dev netcat-traditional && \
     rm -rf /var/lib/apt/lists/*
