@@ -94,6 +94,9 @@ class NotificationViewSet(viewsets.ModelViewSet):
         new_task_id = serializer.validated_data.get("task_id", None)
         old_task_id = instance.task_id
 
+        print(f"{instance = }")
+        print(f"{new_task_id = }\n{old_task_id = }")
+
         updated_instance = serializer.save()
 
         if new_task_id and new_task_id != old_task_id:
