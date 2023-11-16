@@ -70,20 +70,20 @@ class NotificationViewSet(viewsets.ModelViewSet):
             "recipient": recipient,
             "subject": subject,
             "message": message,
-            "scheduled_time": scheduled_time
+            "scheduled_time": scheduled_time,
         }
 
         send_scheduled_notification_task.apply_async(
-            (instance_to_task, ),
-            task_id=task_id,
-            eta=scheduled_time
+            (instance_to_task,), task_id=task_id, eta=scheduled_time
         )
 
-    def perform_update(self, serializer):
+    def update(self, request, *args, **kwargs):
         user = self.request.user
-        instance = serializer.instance
+        instance = self.get_object()
 
-        if not user.is_authenticated or (user != instance.user and user.role not in [Role.ADMIN, Role.MANAGER]):
+        if user.is_anonymous or (
+            user != instance.user and user.role not in [Role.ADMIN, Role.MANAGER]
+        ):
             return Response(
                 {
                     "error": "You don't have permission to update this notification",
@@ -91,33 +91,41 @@ class NotificationViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        new_task_id = serializer.validated_data.get("task_id", None)
-        old_task_id = instance.task_id
+        serializer = self.get_serializer(
+            instance, data=request.data, partial=kwargs.pop("partial", False)
+        )
+        serializer.is_valid(raise_exception=True)
 
-        print(f"{instance = }")
-        print(f"{new_task_id = }\n{old_task_id = }")
+        old_task_id = instance.task_id
+        instance.task_id = str(uuid())
+        new_task_id = instance.task_id
+
+        if instance.sent:
+            instance.sent = False
 
         updated_instance = serializer.save()
 
-        if new_task_id and new_task_id != old_task_id:
-            cancel_celery_task(old_task_id)
+        cancel_celery_task(old_task_id)
 
-        if instance.scheduled_send_date or instance.title or instance.message or instance.user:
-            recipient = updated_instance.user.email
-            subject = updated_instance.title
-            message = updated_instance.message
-            scheduled_time = updated_instance.scheduled_send_date
+        recipient = updated_instance.user.email
+        subject = updated_instance.title
+        message = updated_instance.message
+        scheduled_time = updated_instance.scheduled_send_date
 
-            instance_to_task = {
-                "id": instance.id,
-                "recipient": recipient,
-                "subject": subject,
-                "message": message,
-                "scheduled_time": scheduled_time
-            }
+        instance_to_task = {
+            "id": instance.id,
+            "recipient": recipient,
+            "subject": subject,
+            "message": message,
+            "scheduled_time": scheduled_time,
+        }
 
-            send_scheduled_notification_task.apply_async(
-                (instance_to_task,),
-                task_id=new_task_id,
-                eta=scheduled_time
-            )
+        send_scheduled_notification_task.apply_async(
+            (instance_to_task,), task_id=new_task_id, eta=scheduled_time
+        )
+
+        headers = self.get_success_headers(serializer.data)
+
+        return Response(
+            data=serializer.data, status=200, headers=headers
+        )
