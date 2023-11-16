@@ -5,7 +5,10 @@ from notifications.validators import validate_date
 
 
 class NotificationSerializer(serializers.ModelSerializer):
-    scheduled_send_date = serializers.DateTimeField(validators=[validate_date])
+    scheduled_send_date = serializers.DateTimeField(
+        validators=[validate_date], required=True
+    )
+    task_id = serializers.CharField(read_only=True)
 
     class Meta:
         model = Notification
