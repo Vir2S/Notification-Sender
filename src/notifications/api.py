@@ -81,8 +81,10 @@ class NotificationViewSet(viewsets.ModelViewSet):
         user = self.request.user
         instance = self.get_object()
 
-        if user.is_anonymous or (
-            user != instance.user and user.role not in [Role.ADMIN, Role.MANAGER]
+        if (
+            user.is_anonymous
+            or user != instance.user
+            or user.role not in [Role.ADMIN, Role.MANAGER]
         ):
             return Response(
                 {
@@ -126,6 +128,4 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
         headers = self.get_success_headers(serializer.data)
 
-        return Response(
-            data=serializer.data, status=200, headers=headers
-        )
+        return Response(data=serializer.data, status=200, headers=headers)
