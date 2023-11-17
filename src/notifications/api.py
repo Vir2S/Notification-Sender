@@ -54,7 +54,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
                     {
                         "error": "You don't have permission to create",
                     },
-                    status=403,
+                    status=status.HTTP_403_FORBIDDEN,
                 )
 
             instance = serializer.save(user=user)
@@ -82,9 +82,9 @@ class NotificationViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
 
         if (
-            user.is_anonymous
-            or user != instance.user
-            or user.role not in [Role.ADMIN, Role.MANAGER]
+                user.is_anonymous
+                or user != instance.user
+                or user.role not in [Role.ADMIN, Role.MANAGER]
         ):
             return Response(
                 {
@@ -128,4 +128,32 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
         headers = self.get_success_headers(serializer.data)
 
-        return Response(data=serializer.data, status=200, headers=headers)
+        return Response(
+            data=serializer.data,
+            status=status.HTTP_200_OK,
+            headers=headers)
+
+    def destroy(self, request, *args, **kwargs):
+        user = self.request.user
+        notification = self.get_object()
+
+        if (
+                user.is_anonymous
+                or user != notification.user
+                or user.role not in [Role.ADMIN, Role.MANAGER, Role.USER]
+        ):
+            return Response(
+                {
+                    "error": "You don't have permission to delete this notification",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        task_id = notification.task_id
+        cancel_celery_task(task_id)
+        notification.delete()
+
+        return Response(
+            {"detail": "Notification successfully deleted."},
+            status=status.HTTP_204_NO_CONTENT,
+        )
