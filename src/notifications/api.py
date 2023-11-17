@@ -46,7 +46,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
         user = self.request.user
 
         if user.role == Role.ADMIN or user.role == Role.MANAGER:
-            instance = serializer.save()
+            notification = serializer.save()
 
         else:
             if user != serializer.validated_data.get("user") or user.is_anonymous:
@@ -54,19 +54,19 @@ class NotificationViewSet(viewsets.ModelViewSet):
                     {
                         "error": "You don't have permission to create",
                     },
-                    status=403,
+                    status=status.HTTP_403_FORBIDDEN,
                 )
 
-            instance = serializer.save(user=user)
+            notification = serializer.save(user=user)
 
-        recipient = instance.user.email
-        subject = instance.title
-        message = instance.message
-        scheduled_time = instance.scheduled_send_date
-        task_id = instance.task_id
+        recipient = notification.user.email
+        subject = notification.title
+        message = notification.message
+        scheduled_time = notification.scheduled_send_date
+        task_id = notification.task_id
 
-        instance_to_task = {
-            "id": instance.id,
+        notification_to_task = {
+            "id": notification.id,
             "recipient": recipient,
             "subject": subject,
             "message": message,
@@ -74,15 +74,17 @@ class NotificationViewSet(viewsets.ModelViewSet):
         }
 
         send_scheduled_notification_task.apply_async(
-            (instance_to_task,), task_id=task_id, eta=scheduled_time
+            (notification_to_task,), task_id=task_id, eta=scheduled_time
         )
 
     def update(self, request, *args, **kwargs):
         user = self.request.user
-        instance = self.get_object()
+        notification = self.get_object()
 
-        if user.is_anonymous or (
-            user != instance.user and user.role not in [Role.ADMIN, Role.MANAGER]
+        if (
+                user.is_anonymous
+                or user != notification.user
+                or user.role not in [Role.ADMIN, Role.MANAGER]
         ):
             return Response(
                 {
@@ -92,28 +94,28 @@ class NotificationViewSet(viewsets.ModelViewSet):
             )
 
         serializer = self.get_serializer(
-            instance, data=request.data, partial=kwargs.pop("partial", False)
+            notification, data=request.data, partial=kwargs.pop("partial", False)
         )
         serializer.is_valid(raise_exception=True)
 
-        old_task_id = instance.task_id
-        instance.task_id = str(uuid())
-        new_task_id = instance.task_id
+        old_task_id = notification.task_id
+        notification.task_id = str(uuid())
+        new_task_id = notification.task_id
 
-        if instance.sent:
-            instance.sent = False
+        if notification.sent:
+            notification.sent = False
 
-        updated_instance = serializer.save()
+        updated_notification = serializer.save()
 
         cancel_celery_task(old_task_id)
 
-        recipient = updated_instance.user.email
-        subject = updated_instance.title
-        message = updated_instance.message
-        scheduled_time = updated_instance.scheduled_send_date
+        recipient = updated_notification.user.email
+        subject = updated_notification.title
+        message = updated_notification.message
+        scheduled_time = updated_notification.scheduled_send_date
 
-        instance_to_task = {
-            "id": instance.id,
+        notification_to_task = {
+            "id": notification.id,
             "recipient": recipient,
             "subject": subject,
             "message": message,
@@ -121,11 +123,37 @@ class NotificationViewSet(viewsets.ModelViewSet):
         }
 
         send_scheduled_notification_task.apply_async(
-            (instance_to_task,), task_id=new_task_id, eta=scheduled_time
+            (notification_to_task,), task_id=new_task_id, eta=scheduled_time
         )
 
         headers = self.get_success_headers(serializer.data)
 
         return Response(
-            data=serializer.data, status=200, headers=headers
+            data=serializer.data,
+            status=status.HTTP_200_OK,
+            headers=headers)
+
+    def destroy(self, request, *args, **kwargs):
+        user = self.request.user
+        notification = self.get_object()
+
+        if (
+                user.is_anonymous
+                or user != notification.user
+                or user.role not in [Role.ADMIN, Role.MANAGER, Role.USER]
+        ):
+            return Response(
+                {
+                    "error": "You don't have permission to delete this notification",
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        task_id = notification.task_id
+        cancel_celery_task(task_id)
+        notification.delete()
+
+        return Response(
+            {"detail": "Notification successfully deleted."},
+            status=status.HTTP_204_NO_CONTENT,
         )
