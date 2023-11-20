@@ -13,6 +13,7 @@ class Notification(models.Model):
     title = models.CharField(max_length=255, blank=True, null=True)
     message = models.TextField(null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
     scheduled_send_date = models.DateTimeField(validators=[validate_date])
     sent = models.BooleanField(default=False)
     task_id = models.CharField(max_length=50, editable=False)

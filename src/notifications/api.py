@@ -1,4 +1,5 @@
 from celery import uuid
+from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 
@@ -32,11 +33,11 @@ class NotificationViewSet(viewsets.ModelViewSet):
             case "create":
                 permission_classes = [RoleIsAdmin | RoleIsManager | RoleIsUser]
             case "retrieve":
-                permission_classes = [IsOwner | RoleIsAdmin | RoleIsManager]
+                permission_classes = [RoleIsAdmin | RoleIsManager | IsOwner]
             case "update":
-                permission_classes = [IsOwner | RoleIsAdmin | RoleIsManager]
+                permission_classes = [RoleIsAdmin | RoleIsManager | IsOwner]
             case "destroy":
-                permission_classes = [IsOwner | RoleIsAdmin | RoleIsManager]
+                permission_classes = [RoleIsAdmin | RoleIsManager | IsOwner]
             case _:
                 permission_classes = []
 
@@ -75,20 +76,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
         )
 
     def update(self, request, *args, **kwargs):
-        user = self.request.user
-        notification = self.get_object()
-
-        if (
-                user.is_anonymous
-                or user != notification.user
-                or user.role not in [Role.ADMIN, Role.MANAGER]
-        ):
-            return Response(
-                {
-                    "error": "You don't have permission to update this notification",
-                },
-                status=status.HTTP_403_FORBIDDEN,
-            )
+        notification = get_object_or_404(Notification, pk=request.data.get("id"))
 
         serializer = self.get_serializer(
             notification, data=request.data, partial=kwargs.pop("partial", False)
@@ -129,20 +117,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
         )
 
     def destroy(self, request, *args, **kwargs):
-        user = self.request.user
-        notification = self.get_object()
-
-        if (
-                user.is_anonymous
-                or user != notification.user
-                or user.role not in [Role.ADMIN, Role.MANAGER, Role.USER]
-        ):
-            return Response(
-                {
-                    "error": "You don't have permission to delete this notification",
-                },
-                status=status.HTTP_403_FORBIDDEN,
-            )
+        notification = get_object_or_404(Notification, pk=request.data.get("id"))
 
         task_id = notification.task_id
         cancel_celery_task(task_id)
