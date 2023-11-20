@@ -59,17 +59,14 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
             notification = serializer.save(user=user)
 
-        recipient = notification.user.email
-        subject = notification.title
-        message = notification.message
         scheduled_time = notification.scheduled_send_date
         task_id = notification.task_id
 
         notification_to_task = {
             "id": notification.id,
-            "recipient": recipient,
-            "subject": subject,
-            "message": message,
+            "recipient": notification.user.email,
+            "subject": notification.title,
+            "message": notification.message,
             "scheduled_time": scheduled_time,
         }
 
@@ -109,16 +106,13 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
         cancel_celery_task(old_task_id)
 
-        recipient = updated_notification.user.email
-        subject = updated_notification.title
-        message = updated_notification.message
         scheduled_time = updated_notification.scheduled_send_date
 
         notification_to_task = {
             "id": notification.id,
-            "recipient": recipient,
-            "subject": subject,
-            "message": message,
+            "recipient": updated_notification.user.email,
+            "subject": updated_notification.title,
+            "message": updated_notification.message,
             "scheduled_time": scheduled_time,
         }
 
