@@ -131,7 +131,8 @@ class NotificationViewSet(viewsets.ModelViewSet):
         return Response(
             data=serializer.data,
             status=status.HTTP_200_OK,
-            headers=headers)
+            headers=headers
+        )
 
     def destroy(self, request, *args, **kwargs):
         user = self.request.user
