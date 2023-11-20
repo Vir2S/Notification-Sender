@@ -116,12 +116,12 @@ class NotificationViewSet(viewsets.ModelViewSet):
             headers=headers
         )
 
-    def destroy(self, request, *args, **kwargs):
+    def delete(self, request):
         notification = get_object_or_404(Notification, pk=request.data.get("id"))
 
         task_id = notification.task_id
         cancel_celery_task(task_id)
-        notification.delete()
+        self.perform_destroy(notification)
 
         return Response(
             {"detail": "Notification successfully deleted."},
