@@ -1,5 +1,5 @@
 # Notification-Sender
-Email notifications sender
+Email notifications sender REST API
 
 ## Description
 
