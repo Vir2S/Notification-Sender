@@ -5,7 +5,7 @@
 		restart \
 		down
 
-run: ## Up
+up: ## Up
 	docker-compose up
 run: ## Run
 	docker-compose up -d
